@@ -30,7 +30,12 @@ def load_records(path):
 def filter_records(records, **criteria):
     """Return only the rows where, for every field=value pair passed as a keyword
     argument, str(row[field]) == str(value)."""
-    raise NotImplementedError
+    # Compare as strings so CSV rows ("10") and JSON rows (10) match the same criteria.
+    return [
+        row
+        for row in records
+        if all(str(row[field]) == str(value) for field, value in criteria.items())
+    ]
 
 
 def summarize(records, group_by, value, agg, decimals=2):
