@@ -17,6 +17,7 @@ def build_parser():
     summarize.add_argument(
         "--agg", required=True, choices=["count", "sum", "mean", "min", "max"], help="aggregation to apply"
     )
+    summarize.add_argument("--decimals", type=int, default=2, help="decimal places for mean (default 2)")
 
     top = subparsers.add_parser("top", help="show the rows with the largest numeric field")
     top.add_argument("file", help="path to a .csv or .json file")
@@ -32,7 +33,7 @@ def main(argv=None):
     records = datakit.load_records(args.file)
 
     if args.command == "summarize":
-        summary = datakit.summarize(records, args.group_by, args.value, args.agg)
+        summary = datakit.summarize(records, args.group_by, args.value, args.agg, args.decimals)
         print(datakit.to_report(summary))
     else:  # "top"
         for row in datakit.top_n(records, args.key, args.n):
