@@ -49,7 +49,30 @@ def summarize(records, group_by, value, agg, decimals=2):
       "max"   -> largest value (float)
     Return a dict mapping each group value to its aggregate. Unknown agg -> ValueError.
     """
-    raise NotImplementedError
+    if agg not in ("count", "sum", "mean", "min", "max"):
+        raise ValueError(f"Unknown agg: {agg!r}")
+
+    # Bucket the rows by their group_by value, keeping first-seen order.
+    groups = {}
+    for row in records:
+        groups.setdefault(row[group_by], []).append(row)
+
+    result = {}
+    for key, rows in groups.items():
+        if agg == "count":
+            result[key] = len(rows)
+            continue
+        # float() handles both CSV strings ("10") and JSON numbers (10).
+        values = [float(row[value]) for row in rows]
+        if agg == "sum":
+            result[key] = sum(values)
+        elif agg == "mean":
+            result[key] = round(sum(values) / len(values), decimals)
+        elif agg == "min":
+            result[key] = min(values)
+        else:  # "max"
+            result[key] = max(values)
+    return result
 
 
 def top_n(records, key, n):
