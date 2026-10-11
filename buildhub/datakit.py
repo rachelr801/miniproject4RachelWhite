@@ -77,7 +77,9 @@ def summarize(records, group_by, value, agg, decimals=2):
 
 def top_n(records, key, n):
     """Return the `n` rows with the largest numeric `key`, sorted descending."""
-    raise NotImplementedError
+    # float() so CSV strings sort numerically ("9" < "10"), not alphabetically.
+    ranked = sorted(records, key=lambda row: float(row[key]), reverse=True)
+    return ranked[:n]
 
 
 def to_report(summary):
